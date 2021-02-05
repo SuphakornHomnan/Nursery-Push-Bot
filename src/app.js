@@ -94,7 +94,7 @@ async function writeShellFile (dateNow, message) {
       fs.writeFileSync(
         './test.sh',
         `curl -H 'Content-Type: application/json' -H 'Authorization: Bearer {${process.env.TOKEN}}' -X POST -d '{
-            "to": ["Uaf3e8e05760c1392233f0aaa85f83b87"],
+            "to": ["${process.env.USER}"],
             "messages":[
               {
                 "type":"text",
