@@ -8,6 +8,8 @@ exports.getAttendNotification = async () => {
     date: moment().format('YYYY-MM-DD') + 'T00:00:00.000+00:00',
     attend: false
   })
+  console.log('absentToday')
+  console.log(absentToday)
   const info = []
   for (let i = 0; i < absentToday.length; i++) {
     const guardianInfo = await guardians.find({ child: absentToday[i].child })

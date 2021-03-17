@@ -10,7 +10,7 @@ const { getAttendNotification } = require('./helpers/getNotice')
 require('dotenv').config()
 require('./models/mongo')
 
-async function writeShellFile (dateNow, message) {
+async function writeShellFile (message) {
   let users = ''
 
   message._id.forEach((element, index) => {
@@ -25,38 +25,33 @@ async function writeShellFile (dateNow, message) {
   })
 
   //   console.log(typeof users);
-  //   console.log(`${users}`);
+  console.log(users)
   //   console.log(message.attend);
   //   console.log(dateNow);
 
   try {
-    fs.writeFileSync(
-      './test.sh',
-      `curl -H 'Content-Type: application/json' -H 'Authorization: Bearer {${process.env.TOKEN}}' -X POST -d '{
-          "to": [${users}],
-          "messages":[
-            
-            {
-              "type":"text",
-              "text":"ตอนนี้เวลา ${dateNow}"
-            },
+    if (users === '') {
+      // Do nothing
+    } else {
+      fs.writeFileSync(
+        './test.sh',
+        `curl -H 'Content-Type: application/json' -H 'Authorization: Bearer {${process.env.TOKEN}}' -X POST -d '{
+            "to": [${users}],
+            "messages":[{
+                "type":"text",
+                "text":"น้อง${message.attend}"
+              }]
+          }' https://api.line.me/v2/bot/message/multicast`,
+        (err) => {
+          if (err) {
+            console.log('error at write_file_func')
+            throw err
+          }
 
-            {
-              "type":"text",
-              "text":"น้อง${message.attend}"
-            }
-            
-          ]
-        }' https://api.line.me/v2/bot/message/multicast`,
-      (err) => {
-        if (err) {
-          console.log('error at write_file_func')
-          throw err
+          console.log('Saved')
         }
-
-        console.log('Saved')
-      }
-    )
+      )
+    }
   } catch (err) {
     console.log('error begun')
     console.log(err)
@@ -69,7 +64,7 @@ async function writeShellFile (dateNow, message) {
   const HOUR = MINUTE * 60
   const DAY = HOUR * 24
 
-  function sendMessage () {
+  async function sendMessage () {
     const today = new Date()
 
     const todayString = today.toString()
@@ -77,7 +72,7 @@ async function writeShellFile (dateNow, message) {
     const triggerDate = checkDay(todaySplit[0])
 
     const time = today.getTime()
-
+    console.log(triggerDate)
     let hoursCount = Math.floor((time % DAY) / HOUR)
     const minuteCount = Math.floor((time % HOUR) / MINUTE)
 
@@ -87,48 +82,23 @@ async function writeShellFile (dateNow, message) {
     if (hoursCount > 23) {
       hoursCount = hoursCount - 24
     }
-
     const dateNow = `${hoursCount}:${minuteCount}`
-    console.log(dateNow)
-    if (triggerDate && dateNow === '10:30') {
-      fs.writeFileSync(
-        './test.sh',
-        `curl -H 'Content-Type: application/json' -H 'Authorization: Bearer {${process.env.TOKEN}}' -X POST -d '{
-            "to": ["${process.env.USER}"],
-            "messages":[
-              {
-                "type":"text",
-                "text":"ตื่นได้แล้วไนซ์"
-              },
-              {
-                "type":"text",
-                "text": "ตอนนี้เวลา ${dateNow}"
-              }
-              
-            ]
-          }' https://api.line.me/v2/bot/message/multicast`,
-        (err) => {
-          if (err) {
-            console.log('error at write_file_func')
-            throw err
-          }
-          console.log('Saved')
-        }
-      )
-      shell.exec('chmod +x ./test.sh')
-      shell.exec('./test.sh')
-      // getAttendNotification().then((result) => {
-      //   //   console.log(result);
-      //   if (result._id.length > 0) {
-      //     writeShellFile(dateNow, result)
 
-      //     shell.exec('chmod +x ./test.sh')
-      //     shell.exec('./test.sh')
-      //   } else {
-      //     //Don't send msg to guardians
-      //     console.log(`today don't have child absent`)
-      //   }
-      // })
+    console.log(dateNow)
+    if (dateNow === '12:0') {
+      try {
+        const test = await getAttendNotification()
+        console.log(test)
+        writeShellFile(test)
+        if (test._id.length === 0) {
+          console.log('Do nothing')
+        } else {
+          shell.exec('chmod +x ./test.sh')
+          shell.exec('./test.sh')
+        }
+      } catch (error) {
+        console.log(error)
+      }
     } else {
       // Do nothing
     }
