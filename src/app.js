@@ -24,11 +24,6 @@ async function writeShellFile (message) {
     }
   })
 
-  //   console.log(typeof users);
-  console.log(users)
-  //   console.log(message.attend);
-  //   console.log(dateNow);
-
   try {
     if (users === '') {
       // Do nothing
@@ -53,7 +48,6 @@ async function writeShellFile (message) {
       )
     }
   } catch (err) {
-    console.log('error begun')
     console.log(err)
   }
 }
@@ -72,7 +66,6 @@ async function writeShellFile (message) {
     const triggerDate = checkDay(todaySplit[0])
 
     const time = today.getTime()
-    console.log(triggerDate)
     let hoursCount = Math.floor((time % DAY) / HOUR)
     const minuteCount = Math.floor((time % HOUR) / MINUTE)
 
@@ -83,12 +76,9 @@ async function writeShellFile (message) {
       hoursCount = hoursCount - 24
     }
     const dateNow = `${hoursCount}:${minuteCount}`
-
-    console.log(dateNow)
     if (dateNow === '12:0') {
       try {
         const test = await getAttendNotification()
-        console.log(test)
         writeShellFile(test)
         if (test._id.length === 0) {
           console.log('Do nothing')
